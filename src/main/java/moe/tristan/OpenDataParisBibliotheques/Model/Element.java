@@ -6,6 +6,7 @@
 package moe.tristan.OpenDataParisBibliotheques.Model;
 
 import com.google.gson.internal.LinkedTreeMap;
+import javafx.beans.property.SimpleStringProperty;
 import lombok.Builder;
 import lombok.Getter;
 import org.jetbrains.annotations.Contract;
@@ -28,7 +29,23 @@ public class Element {
         return fields.get("titre");
     }
 
-
+    public SimpleStringProperty observe(String field) {
+        switch (field) {
+            case "recordid":
+                break;
+            case "recordTimestamp":
+                break;
+            case "format":
+                break;
+            case "langue":
+                break;
+            case "catstat1":
+                break;
+            default:
+                return null;
+        }
+        return new SimpleStringProperty(recordID);
+    }
 
     /**
      * Class managing the metadata of the resultset.

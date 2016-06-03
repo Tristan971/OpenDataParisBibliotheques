@@ -42,7 +42,7 @@ public class APIHandler {
     private static final Gson gson = new Gson();
 
     @NotNull
-    public static APICallResult getAllElements() {
+    public static APICallResult executeAPICall() {
         try {
             BufferedReader apiReader = new BufferedReader(
                     new InputStreamReader(

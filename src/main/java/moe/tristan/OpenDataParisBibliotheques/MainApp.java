@@ -6,9 +6,10 @@
 package moe.tristan.OpenDataParisBibliotheques;
 
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import moe.tristan.OpenDataParisBibliotheques.Model.APICallResult;
-import moe.tristan.OpenDataParisBibliotheques.Model.APIHandler;
 
 public class MainApp extends Application {
 
@@ -18,7 +19,18 @@ public class MainApp extends Application {
     }
 
     public void start(Stage stage) throws Exception {
-        APICallResult result = APIHandler.getAllElements();
-        result.getElementList().parallelStream().forEach(System.out::println);
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(
+                getClass().getResource(
+                        "/moe/tristan/OpenDataParisBibliotheques/"
+                                + "views/"
+                                + "RootView.fxml"
+                )
+        );
+        AnchorPane mainPane = loader.load();
+
+        Scene mainScene = new Scene(mainPane);
+        stage.setScene(mainScene);
+        stage.show();
     }
 }
