@@ -7,6 +7,7 @@ package moe.tristan.OpenDataParisBibliotheques.Model;
 
 import lombok.Builder;
 import lombok.Getter;
+import moe.tristan.OpenDataParisBibliotheques.Model.Elements.Element;
 import org.jetbrains.annotations.Contract;
 
 import java.util.Collections;
@@ -18,13 +19,11 @@ import java.util.List;
 
 @Builder
 public class APICallResult {
-    @Getter private final Element.InfoElement infoElement;
     @Getter private final List<Element> elementList;
 
     @Contract(" -> !null")
     public static APICallResult FaultyAPICallResult() {
         return new APICallResult(
-                Element.InfoElement.FaultyInfoElement(),
                 Collections.emptyList()
         );
     }

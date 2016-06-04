@@ -30,6 +30,7 @@ public class MainApp extends Application {
         AnchorPane mainPane = loader.load();
 
         Scene mainScene = new Scene(mainPane);
+        stage.setTitle("Available books at the Paris libraries");
         stage.setScene(mainScene);
         stage.show();
     }

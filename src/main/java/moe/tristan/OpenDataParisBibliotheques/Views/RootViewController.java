@@ -15,8 +15,10 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import moe.tristan.OpenDataParisBibliotheques.Model.APIHandler;
-import moe.tristan.OpenDataParisBibliotheques.Model.Element;
+import moe.tristan.OpenDataParisBibliotheques.Model.Elements.CommonField;
+import moe.tristan.OpenDataParisBibliotheques.Model.Elements.Element;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -39,14 +41,32 @@ public class RootViewController extends AnchorPane {
     }
 
     public void initialize() {
+        initializeCells();
+    }
+
+    private void initializeCells() {
         elementsTableView.setItems(currentSelectedElements);
 
         TableColumn<Element,String> recordIDCol = new TableColumn<>("Record ID");
         recordIDCol.setCellValueFactory(element -> new SimpleStringProperty(element.getValue().getRecordID()));
 
+
+        LinkedList<TableColumn<Element, String>> columns = new LinkedList<>();
+
+        for (CommonField commonField : CommonField.values()) {
+            System.out.println("Working out : "+commonField.name());
+            TableColumn<Element, String> aColumn = new TableColumn<>(commonField.name());
+            aColumn.setCellValueFactory(
+                    element -> element.getValue().getProperty(
+                            commonField.toString()
+                    )
+            );
+            columns.add(aColumn);
+        }
+
         //It works, stfu java
         //noinspection unchecked
-        elementsTableView.getColumns().setAll(recordIDCol);
-
+        elementsTableView.getColumns().setAll(columns);
+        numberOfHits.setText(""+elementsTableView.getItems().size());
     }
 }

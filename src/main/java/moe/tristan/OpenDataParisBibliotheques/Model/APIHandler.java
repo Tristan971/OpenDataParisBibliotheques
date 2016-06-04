@@ -7,7 +7,8 @@ package moe.tristan.OpenDataParisBibliotheques.Model;
 
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
-import moe.tristan.OpenDataParisBibliotheques.Model.Element.InfoElement;
+import moe.tristan.OpenDataParisBibliotheques.Model.Elements.Element;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -23,73 +24,91 @@ import java.util.LinkedList;
  */
 @SuppressWarnings("rawtypes")
 public class APIHandler {
-    private static final String QUERY_URL =
-            "http://opendata.paris.fr/api/records/1.0/search/"
-                    + "?dataset=tous-les-documents-des-bibliotheques-de-pret"
-                    + "&facet=langue"
-                    + "&facet=genre"
-                    + "&facet=theme"
-                    + "&facet=titre_de_serie"
-                    + "&facet=collection"
-                    + "&facet=annee"
-                    + "&facet=auteur"
-                    + "&facet=editeur"
-                    + "&facet=genre_theme_type"
-                    + "&facet=type_de_document"
-                    + "&facet=categorie_statistique_1"
-                    + "&facet=categorie_statistique_2";
 
     private static final Gson gson = new Gson();
 
     @NotNull
     public static APICallResult executeAPICall() {
+        LinkedList<HashMap> rawElementsList = new LinkedList<>();
+
+        int numElements = extractNumhits(executeQuery(readElements(0, 1)));
+
+        //int i = 0;
+        //
+        //while (numElements - i > 10000) {
+        //    rawElementsList.add()
+        //}
+
+        rawElementsList.add(executeQuery(readElements(0, 2000)));
+        return handleRawElements(rawElementsList);
+    }
+
+    private static HashMap executeQuery(String QUERY) {
         try {
             BufferedReader apiReader = new BufferedReader(
                     new InputStreamReader(
-                            new URL(QUERY_URL).openStream()
+                            new URL(QUERY).openStream()
                     )
             );
-            HashMap rawElements = gson.fromJson(apiReader, HashMap.class);
-            return handleRawElements(rawElements);
+            return gson.fromJson(apiReader, HashMap.class);
         } catch (IOException e) {
             e.printStackTrace();
-            return APICallResult.FaultyAPICallResult();
+            return new HashMap();
         }
     }
 
+    @Contract(pure = true)
+    private static String readElements(int start, int numberOfElements) {
+        return "http://opendata.paris.fr/api/records/1.0/search/"
+                + "?dataset=tous-les-documents-des-bibliotheques-de-pret"
+                + "&rows="+numberOfElements
+                + "&facet=langue"
+                + "&facet=genre"
+                + "&facet=theme"
+                + "&facet=titre_de_serie"
+                + "&facet=collection"
+                + "&facet=annee"
+                + "&facet=auteur"
+                + "&facet=editeur"
+                + "&facet=genre_theme_type"
+                + "&facet=type_de_document"
+                + "&facet=categorie_statistique_1"
+                + "&facet=categorie_statistique_2";
+    }
 
-    private static APICallResult handleRawElements(HashMap rawElements) {
-        InfoElement infoElement =
-                InfoElement.builder()
-                        .nhits(rawElements.get("nhits").toString())
-                        .parameters((LinkedTreeMap) rawElements.get("parameters"))
-                        .build();
+    private static int extractNumhits(HashMap infoQueryResult) {
+        return (int) Double.parseDouble(infoQueryResult.get("nhits").toString());
+    }
 
+
+    private static APICallResult handleRawElements(LinkedList<HashMap> rawElementsList) {
         LinkedList<Element> elements = new LinkedList<>();
 
-        ArrayList records = (ArrayList) rawElements.get("records");
-        //noinspection unchecked
-        records.parallelStream()
-                .forEach(
-                        element -> {
-                            Element.ElementBuilder elemBuilder = Element.builder();
-                            elemBuilder.recordID(
-                                    (String) ((LinkedTreeMap) element).get("recordid")
-                            );
-                            elemBuilder.recordTimestamp(
-                                    (String) ((LinkedTreeMap) element).get("record_timestamp")
-                            );
-                            elemBuilder.fields(
-                                    (LinkedTreeMap) ((LinkedTreeMap) element).get("fields")
-                            );
-                            elements.add(elemBuilder.build());
-                        }
-                );
+        for (HashMap rawElements : rawElementsList) {
+            ArrayList records = (ArrayList) rawElements.get("records");
 
-
+            //noinspection unchecked
+            records.parallelStream()
+                    .filter(element -> element != null)
+                    .forEach(
+                            element -> {
+                                Element.ElementBuilder elemBuilder = Element.builder();
+                                elemBuilder.recordID(
+                                        (String) ((LinkedTreeMap) element).get("recordid")
+                                );
+                                elemBuilder.recordTimestamp(
+                                        (String) ((LinkedTreeMap) element).get("record_timestamp")
+                                );
+                                //noinspection unchecked
+                                elemBuilder.fields(
+                                        (LinkedTreeMap) ((LinkedTreeMap) element).get("fields")
+                                );
+                                elements.add(elemBuilder.build());
+                            }
+                    );
+        }
 
         return APICallResult.builder()
-                .infoElement(infoElement)
                 .elementList(elements)
                 .build();
     }
