@@ -16,8 +16,7 @@ public enum CommonField {
     ID("id"),
     COTE("cote"),
     YEAR("annee"),
-    CAT_STAT_1("categorie_statistique_1"),
-    CAT_STAT_2("categorie_statistique_2")
+    CAT_STAT_1("categorie_statistique_1")
     ;
 
     private final String field;

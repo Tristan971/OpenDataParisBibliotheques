@@ -25,7 +25,11 @@ public class Element {
         return (String) fields.get("titre");
     }
 
-    public SimpleStringProperty getProperty(String property) {
-        return new SimpleStringProperty(""+this.fields.get(property));
+    public SimpleStringProperty getProperty(CommonField commonField) {
+        return new SimpleStringProperty(
+                ""+this.fields.get(
+                        commonField.toString()
+                )
+        );
     }
 }

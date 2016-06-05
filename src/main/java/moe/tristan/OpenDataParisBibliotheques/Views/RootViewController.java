@@ -5,6 +5,7 @@
 
 package moe.tristan.OpenDataParisBibliotheques.Views;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,6 +19,7 @@ import moe.tristan.OpenDataParisBibliotheques.Model.APIHandler;
 import moe.tristan.OpenDataParisBibliotheques.Model.Elements.CommonField;
 import moe.tristan.OpenDataParisBibliotheques.Model.Elements.Element;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,10 +39,10 @@ public class RootViewController extends AnchorPane {
 
     public RootViewController() {
         this.allElements = APIHandler.executeAPICall().getElementList();
-        this.currentSelectedElements = FXCollections.observableList(allElements);
     }
 
     public void initialize() {
+        this.currentSelectedElements = FXCollections.observableList(allElements);
         initializeCells();
     }
 
@@ -49,24 +51,21 @@ public class RootViewController extends AnchorPane {
 
         TableColumn<Element,String> recordIDCol = new TableColumn<>("Record ID");
         recordIDCol.setCellValueFactory(element -> new SimpleStringProperty(element.getValue().getRecordID()));
-
-
         LinkedList<TableColumn<Element, String>> columns = new LinkedList<>();
 
-        for (CommonField commonField : CommonField.values()) {
-            System.out.println("Working out : "+commonField.name());
-            TableColumn<Element, String> aColumn = new TableColumn<>(commonField.name());
-            aColumn.setCellValueFactory(
-                    element -> element.getValue().getProperty(
-                            commonField.toString()
-                    )
-            );
-            columns.add(aColumn);
-        }
+        Arrays.stream(CommonField.values()).forEach(commonField ->
+                Platform.runLater(() -> {
+                    TableColumn<Element, String> aColumn = new TableColumn<>(commonField.name());
+                    aColumn.setCellValueFactory(
+                            cell -> cell.getValue().getProperty(commonField)
+                    );
+                    aColumn.setPrefWidth(elementsTableView.getWidth() / CommonField.values().length);
+                    elementsTableView.getColumns().add(aColumn);
+                })
+        );
 
         //It works, stfu java
         //noinspection unchecked
-        elementsTableView.getColumns().setAll(columns);
         numberOfHits.setText(""+elementsTableView.getItems().size());
     }
 }

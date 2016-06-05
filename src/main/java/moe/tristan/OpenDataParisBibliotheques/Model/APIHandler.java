@@ -32,14 +32,7 @@ public class APIHandler {
         LinkedList<HashMap> rawElementsList = new LinkedList<>();
 
         int numElements = extractNumhits(executeQuery(readElements(0, 1)));
-
-        //int i = 0;
-        //
-        //while (numElements - i > 10000) {
-        //    rawElementsList.add()
-        //}
-
-        rawElementsList.add(executeQuery(readElements(0, 2000)));
+        rawElementsList.add(executeQuery(readElements(0, 200)));
         return handleRawElements(rawElementsList);
     }
 
