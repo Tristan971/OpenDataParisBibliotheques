@@ -44,6 +44,7 @@ public class RootViewController extends AnchorPane {
     public void initialize() {
         this.currentSelectedElements = FXCollections.observableList(allElements);
         initializeCells();
+        elementsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
     private void initializeCells() {
